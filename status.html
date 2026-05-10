@@ -15,46 +15,111 @@
             padding: 15px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
 
-        .container {
-            padding: 20px;
-        }
-
-        .welcome {
-            font-size: 22px;
-            margin-bottom: 20px;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .card h3 {
-            margin-bottom: 10px;
-        }
-
-        .card button {
-            padding: 8px 15px;
-            border: none;
-            background: #2e7d32;
+        .navbar button {
+            background: #1b5e20;
             color: white;
+            border: none;
+            padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        .card button:hover {
-            background: #1b5e20;
+        .navbar button:hover {
+            background: #0d3817;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: #2e7d32;
+            margin-bottom: 20px;
+        }
+
+        .status-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .application-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .application-card h3 {
+            margin: 0 0 10px 0;
+            color: #2e7d32;
+        }
+
+        .application-card p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-badge.approved {
+            background: #c8e6c9;
+            color: #1b5e20;
+        }
+
+        .status-badge.rejected {
+            background: #ffcdd2;
+            color: #b71c1c;
+        }
+
+        .status-badge.pending {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-applications {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            color: #666;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-value {
+            color: #666;
         }
     </style>
 </head>
@@ -63,16 +128,121 @@
     <h2>🌱 FarmSeva</h2>
     <button onclick="logout()">Logout</button>
 </div>
+
 <div class="container">
     <h2>Track Application Status</h2>
-    <p>Your subsidy application status: <strong>Under Review</strong></p>
-    <p>Application ID: 12345</p>
-    <p>Submitted on: 2023-10-01</p>
+    
+    <div class="status-section" id="applicationsContainer">
+        <div class="loading">Loading applications...</div>
+    </div>
 </div>
-<script>
-function logout() {
-    window.location.href = "login.html";
-}
+
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getFirestore, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+        apiKey: 'AIzaSyAGU2mzJxu_vwQ-8g6lnMdUhMBc9M6rA_c',
+        authDomain: 'farm-seva-1c9cd.firebaseapp.com',
+        projectId: 'farm-seva-1c9cd',
+        storageBucket: 'farm-seva-1c9cd.firebasestorage.app',
+        messagingSenderId: '497776728271',
+        appId: '1:497776728271:web:025dc1ae4b14164a72ffba',
+        measurementId: 'G-44DNTWGEE6'
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const container = document.getElementById('applicationsContainer');
+
+    async function loadApplicationStatus() {
+        try {
+            let applications = [];
+
+            if (currentUser && currentUser.uid) {
+                // Query applications for the current user
+                const q = query(
+                    collection(db, 'subsidyApplications'),
+                    where('userId', '==', currentUser.uid)
+                );
+                const querySnapshot = await getDocs(q);
+                
+                querySnapshot.forEach(doc => {
+                    applications.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+            } else {
+                container.innerHTML = '<div class="no-applications">Please log in to view your applications.</div>';
+                return;
+            }
+
+            if (applications.length === 0) {
+                container.innerHTML = '<div class="no-applications">No subsidy applications found. <br><a href="subsidy.html">Submit a new application</a></div>';
+                return;
+            }
+
+            // Sort by most recent first
+            applications.sort((a, b) => {
+                const timeA = a.appliedAt?.toMillis?.() || 0;
+                const timeB = b.appliedAt?.toMillis?.() || 0;
+                return timeB - timeA;
+            });
+
+            // Display applications
+            let html = '';
+            applications.forEach(app => {
+                const statusClass = app.status.includes('Approved') ? 'approved' : 
+                                   app.status.includes('Rejected') ? 'rejected' : 'pending';
+                
+                const appliedDate = app.appliedAt ? new Date(app.appliedAt.seconds * 1000).toLocaleDateString() : 'N/A';
+
+                html += `
+                    <div class="application-card">
+                        <h3>${app.name}</h3>
+                        <div class="info-row">
+                            <span class="info-label">Farmer ID:</span>
+                            <span class="info-value">${app.farmerId}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Subsidy Type:</span>
+                            <span class="info-value">${app.subsidyType}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Applied On:</span>
+                            <span class="info-value">${appliedDate}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Land Area:</span>
+                            <span class="info-value">${app.landArea} acres</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Annual Income:</span>
+                            <span class="info-value">₹${parseInt(app.income).toLocaleString()}</span>
+                        </div>
+                        <div>
+                            <span class="status-badge ${statusClass}">${app.status}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+        } catch (error) {
+            console.error('Error loading applications:', error);
+            container.innerHTML = '<div class="no-applications">Error loading applications. Please try again.</div>';
+        }
+    }
+
+    window.logout = function() {
+        window.location.href = 'login.html';
+    };
+
+    loadApplicationStatus();
 </script>
+
 </body>
 </html>

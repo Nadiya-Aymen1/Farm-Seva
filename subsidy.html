@@ -28,6 +28,7 @@
             margin: 7px 0;
             border-radius: 5px;
             border: 1px solid #ccc;
+            box-sizing: border-box;
         }
 
         button {
@@ -43,6 +44,20 @@
         button:hover {
             background: #1b5e20;
         }
+
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .message.success {
+            color: #2e7d32;
+        }
+
+        .message.error {
+            color: #d32f2f;
+        }
     </style>
 </head>
 
@@ -51,34 +66,34 @@
 <div class="container">
     <h2>🌱 Subsidy Application</h2>
 
-    <form onsubmit="applySubsidy(event)">
+    <form id="subsidyForm" onsubmit="applySubsidy(event)">
 
         <!-- Personal Details -->
         <input type="text" id="name" placeholder="Full Name" required>
         <input type="text" id="fid" placeholder="Farmer ID" required>
-        <input type="text" placeholder="Aadhaar Number" required>
-        <input type="text" placeholder="Mobile Number" required>
-        <input type="text" placeholder="Village / Address" required>
+        <input type="text" id="aadhaar" placeholder="Aadhaar Number" required>
+        <input type="text" id="mobile" placeholder="Mobile Number" required>
+        <input type="text" id="village" placeholder="Village / Address" required>
 
         <!-- Land Details -->
-        <input type="number" placeholder="Land Area (acres)" required>
+        <input type="number" id="landArea" placeholder="Land Area (acres)" required>
 
-        <select required>
+        <select id="landType" required>
             <option value="">Land Type</option>
             <option>Irrigated</option>
             <option>Non-Irrigated</option>
         </select>
 
         <!-- Crop Details -->
-        <input type="text" placeholder="Current Crop" required>
-        <input type="text" placeholder="Previous Crop" required>
-        <input type="number" placeholder="Previous Production (quintals)" required>
+        <input type="text" id="currentCrop" placeholder="Current Crop" required>
+        <input type="text" id="previousCrop" placeholder="Previous Crop" required>
+        <input type="number" id="prevProduction" placeholder="Previous Production (quintals)" required>
 
         <!-- Income -->
         <input type="number" id="income" placeholder="Annual Income (₹)" required>
 
         <!-- Subsidy -->
-        <select required>
+        <select id="subsidyType" required>
             <option value="">Select Subsidy Type</option>
             <option>Seed Subsidy</option>
             <option>Fertilizer Subsidy</option>
@@ -87,34 +102,93 @@
 
         <button type="submit">Submit Application</button>
     </form>
+
+    <div class="message" id="statusMessage"></div>
 </div>
 
-<script>
-function applySubsidy(e) {
-    e.preventDefault();
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getFirestore, doc, setDoc, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-    let name = document.getElementById("name").value;
-    let fid = document.getElementById("fid").value;
-    let income = document.getElementById("income").value;
+    const firebaseConfig = {
+        apiKey: 'AIzaSyAGU2mzJxu_vwQ-8g6lnMdUhMBc9M6rA_c',
+        authDomain: 'farm-seva-1c9cd.firebaseapp.com',
+        projectId: 'farm-seva-1c9cd',
+        storageBucket: 'farm-seva-1c9cd.firebasestorage.app',
+        messagingSenderId: '497776728271',
+        appId: '1:497776728271:web:025dc1ae4b14164a72ffba',
+        measurementId: 'G-44DNTWGEE6'
+    };
 
-    let status = "";
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const statusMessage = document.getElementById('statusMessage');
 
-    // Eligibility check
-    if (income <= 300000) {
-        status = "✅ Approved";
-    } else {
-        status = "❌ Rejected (Income too high)";
-    }
+    window.applySubsidy = async function(e) {
+        e.preventDefault();
 
-    // Store data (per user)
-    localStorage.setItem(fid + "_status", status);
-    localStorage.setItem(fid + "_name", name);
+        const formData = {
+            name: document.getElementById('name').value.trim(),
+            farmerId: document.getElementById('fid').value.trim(),
+            aadhaar: document.getElementById('aadhaar').value.trim(),
+            mobile: document.getElementById('mobile').value.trim(),
+            village: document.getElementById('village').value.trim(),
+            landArea: document.getElementById('landArea').value,
+            landType: document.getElementById('landType').value,
+            currentCrop: document.getElementById('currentCrop').value.trim(),
+            previousCrop: document.getElementById('previousCrop').value.trim(),
+            prevProduction: document.getElementById('prevProduction').value,
+            income: parseInt(document.getElementById('income').value),
+            subsidyType: document.getElementById('subsidyType').value,
+            appliedAt: serverTimestamp(),
+            userId: currentUser?.uid || 'anonymous'
+        };
 
-    alert("Application Submitted!");
+        // Eligibility check
+        let status = "";
+        if (formData.income <= 300000) {
+            status = "Approved";
+        } else {
+            status = "Rejected (Income too high)";
+        }
 
-    // Redirect
-    window.location.href = "status.html";
-}
+        formData.status = status;
+        formData.applicationId = Date.now().toString();
+
+        try {
+            // Save to Firestore in 'subsidyApplications' collection
+            const docRef = await addDoc(collection(db, 'subsidyApplications'), formData);
+            
+            // Also save application ID to user's applications list
+            if (currentUser && currentUser.uid) {
+                await setDoc(doc(db, 'users', currentUser.uid, 'subsidyApplications', docRef.id), {
+                    applicationId: docRef.id,
+                    farmerId: formData.farmerId,
+                    status: formData.status,
+                    subsidyType: formData.subsidyType,
+                    appliedAt: serverTimestamp()
+                }, { merge: true });
+            }
+
+            // Store in localStorage as backup
+            localStorage.setItem(formData.farmerId + "_status", formData.status);
+            localStorage.setItem(formData.farmerId + "_name", formData.name);
+            localStorage.setItem(formData.farmerId + "_applicationId", formData.applicationId);
+
+            statusMessage.textContent = '✅ Application Submitted Successfully!';
+            statusMessage.className = 'message success';
+            
+            setTimeout(() => {
+                window.location.href = 'status.html';
+            }, 2000);
+
+        } catch (error) {
+            console.error('Error submitting application:', error);
+            statusMessage.textContent = '❌ Error submitting application. Please try again.';
+            statusMessage.className = 'message error';
+        }
+    };
 </script>
 
 </body>
