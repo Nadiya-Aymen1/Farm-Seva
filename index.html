@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FarmSeva</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .hero {
+            background: linear-gradient(to right, #2e7d32, #66bb6a);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            transition: 0.3s;
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .language-selector label {
+            color: white;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Language Selector -->
+<div class="language-selector">
+    <div class="d-flex align-items-center">
+        <label for="languageSelect" id="languageLabel" class="mb-0">Language:</label>
+        <select id="languageSelect" class="form-select form-select-sm" onchange="setLanguage(this.value)">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="ta">தமிழ்</option>
+            <option value="te">తెలుగు</option>
+        </select>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<div class="hero">
+    <h1 data-i18n="heroTitle">🌱 FarmSeva</h1>
+    <p data-i18n="heroSubtitle">Empowering Farmers with Smart Subsidy Management</p>
+    <a id="loginButton" href="login.html" class="btn btn-light m-2" data-i18n="loginButton">Login</a>
+</div>
+
+<!-- Features Section -->
+<div class="container text-center mt-5">
+
+    <h3 class="mb-4" data-i18n="servicesTitle">Our Services</h3>
+
+    <div class="row">
+
+        <div class="col-md-4">
+            <a href="register.html" style="text-decoration: none; color: inherit;">
+                <div class="card p-4 shadow">
+                    <i class="fa-solid fa-user fa-2x text-success"></i>
+                    <h5 class="mt-3" data-i18n="farmerRegistrationTitle">Farmer Registration</h5>
+                    <p data-i18n="farmerRegistrationText">Register easily and access government schemes.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-4 shadow">
+                <i class="fa-solid fa-file-lines fa-2x text-success"></i>
+                <h5 class="mt-3" data-i18n="applySubsidyTitle">Apply for Subsidy</h5>
+                <p data-i18n="applySubsidyText">Submit applications quickly and securely.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <a href="dashboard.html" style="text-decoration: none; color: inherit;">
+                <div class="card p-4 shadow">
+                    <i class="fa-solid fa-chart-line fa-2x text-success"></i>
+                    <h5 class="mt-3" data-i18n="trackStatusTitle">Track Status</h5>
+                    <p data-i18n="trackStatusText">Monitor your subsidy in real-time.</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <div class="row mt-4">
+
+        <div class="col-md-4">
+            <div class="card p-4 shadow">
+                <i class="fa-solid fa-cloud-sun fa-2x text-success"></i>
+                <h5 class="mt-3" data-i18n="weatherUpdatesTitle">Weather Updates</h5>
+                <p data-i18n="weatherUpdatesText">Get real-time weather updates for better farming decisions.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-4 shadow">
+                <i class="fa-solid fa-seedling fa-2x text-success"></i>
+                <h5 class="mt-3" data-i18n="cropRecommendationTitle">Crop Recommendation</h5>
+                <p data-i18n="cropRecommendationText">AI-based suggestions for suitable crops.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-4 shadow">
+                <i class="fa-solid fa-bell fa-2x text-success"></i>
+                <h5 class="mt-3" data-i18n="notificationsTitle">Notifications</h5>
+                <p data-i18n="notificationsText">Instant updates on subsidy status and schemes.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const translations = {
+        en: {
+            languageLabel: 'Language:',
+            heroTitle: '🌱 FarmSeva',
+            heroSubtitle: 'Empowering Farmers with Smart Subsidy Management',
+            loginButton: 'Login',
+            servicesTitle: 'Our Services',
+            farmerRegistrationTitle: 'Farmer Registration',
+            farmerRegistrationText: 'Register easily and access government schemes.',
+            applySubsidyTitle: 'Apply for Subsidy',
+            applySubsidyText: 'Submit applications quickly and securely.',
+            trackStatusTitle: 'Track Status',
+            trackStatusText: 'Monitor your subsidy in real-time.',
+            weatherUpdatesTitle: 'Weather Updates',
+            weatherUpdatesText: 'Get real-time weather updates for better farming decisions.',
+            cropRecommendationTitle: 'Crop Recommendation',
+            cropRecommendationText: 'AI-based suggestions for suitable crops.',
+            notificationsTitle: 'Notifications',
+            notificationsText: 'Instant updates on subsidy status and schemes.'
+        },
+        hi: {
+            languageLabel: 'भाषा:',
+            heroTitle: '🌱 फ़ार्मसेवा',
+            heroSubtitle: 'कुशल सब्सिडी प्रबंधन के साथ किसानों को सशक्त बनाना',
+            loginButton: 'लॉगिन',
+            servicesTitle: 'हमारी सेवाएं',
+            farmerRegistrationTitle: 'किसान पंजीकरण',
+            farmerRegistrationText: 'सरकारी योजनाओं का उपयोग करने के लिए आसानी से पंजीकरण करें।',
+            applySubsidyTitle: 'सब्सिडी के लिए आवेदन करें',
+            applySubsidyText: 'आवेदन तेज़ी से और सुरक्षित रूप से सबमिट करें।',
+            trackStatusTitle: 'स्थिति ट्रैक करें',
+            trackStatusText: 'अपनी सब्सिडी को वास्तविक समय में मॉनिटर करें।',
+            weatherUpdatesTitle: 'मौसम अपडेट',
+            weatherUpdatesText: 'बेहतर कृषि निर्णयों के लिए वास्तविक समय मौसम अपडेट प्राप्त करें।',
+            cropRecommendationTitle: 'फसल अनुशंसा',
+            cropRecommendationText: 'उपयुक्त फसलों के लिए एआई-आधारित सुझाव।',
+            notificationsTitle: 'सूचनाएं',
+            notificationsText: 'सब्सिडी स्थिति और योजनाओं पर त्वरित अपडेट।'
+        },
+        kn: {
+            languageLabel: 'ಭಾಷೆ:',
+            heroTitle: '🌱 ಫಾರ್ಮ್ ಸೇವಾ',
+            heroSubtitle: 'ಸ್ಮಾರ್ಟ್ ಸಹಾಯಧನವ್ಯವಸ್ಥೆಯೊಂದಿಗೆ ರೈತರಿಗೆ ಶಕ್ತಿ ನೀಡುವುದು',
+            loginButton: 'ಲಾಗಿನ್',
+            servicesTitle: 'ನಮ್ಮ ಸೇವೆಗಳು',
+            farmerRegistrationTitle: 'ರೈತ ನೋಂದಣಿ',
+            farmerRegistrationText: 'ಸರ್ಕಾರಿ ಯೋಜನೆಗಳಿಗೆ ಸುಲಭವಾಗಿ ನೋಂದಣಿ ಮಾಡಿ.',
+            applySubsidyTitle: 'ಸಹಾಯಧನಕ್ಕೆ ಅರ್ಜಿ ಸಲ್ಲಿಸಿ',
+            applySubsidyText: 'ತ್ವರಿತವಾಗಿ ಮತ್ತು ಸುರಕ್ಷಿತವಾಗಿ ಅರ್ಜಿಯನ್ನು ಸಲ್ಲಿಸಿ.',
+            trackStatusTitle: 'ಸ್ಥಿತಿಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ',
+            trackStatusText: 'ನಿಮ್ಮ ಸಹಾಯಧನವನ್ನು ವಾಸ್ತವಿಕ ಸಮಯದಲ್ಲಿ ಫಾಲೋ ಮಾಡಿ.',
+            weatherUpdatesTitle: 'ಹವಾಮಾನ تازهಗಳು',
+            weatherUpdatesText: 'ಉತ್ತಮ ಕೃಷಿ ನಿರ್ಧಾರಗಳಿಗಾಗಿ ರಿಯಲ್-ಟೈಮ್ ಹವಾಮಾನ تازهಗಳು ಪಡೆದುಕೊಳ್ಳಿ.',
+            cropRecommendationTitle: 'ಬೇಲೆಯ ಶಿಫಾರಸು',
+            cropRecommendationText: 'ಸೂಕ್ತ ಬೆಳೆಗೆ AI ಆಧಾರಿತ ಸಲಹೆಗಳು.',
+            notificationsTitle: 'ಸೂಚನೆಗಳು',
+            notificationsText: 'ಸಹಾಯಧನ ಸ್ಥಿತಿ ಮತ್ತು ಯೋಜನೆಗಳ ಕುರಿತು ತಕ್ಷಣದ تازهಗಳು.'
+        },
+        ta: {
+            languageLabel: 'மொழி:',
+            heroTitle: '🌱 பார்்ம்சேவா',
+            heroSubtitle: 'சமரசமில்லாத உதவித் தொகை மேலாண்மையுடன் விவசாயிகளை உறுதியாக்குவது',
+            loginButton: 'உள்நுழைவு',
+            servicesTitle: 'எங்கள் சேவைகள்',
+            farmerRegistrationTitle: 'விவசாயி பதிவு',
+            farmerRegistrationText: 'அரசு திட்டங்களை அணுக எளிதாக பதிவு செய்யவும்.',
+            applySubsidyTitle: 'உதவித் தொகைக்கு விண்ணப்பிக்கவும்',
+            applySubsidyText: 'விண்ணப்பங்களை விரைவாகவும் பாதுகாப்பாகவும் சமர்ப்பிக்கவும்.',
+            trackStatusTitle: 'நிலையை கண்காணி',
+            trackStatusText: 'உங்கள் உதவித் தொகையை நேரடியாக கண்காணிக்கவும்.',
+            weatherUpdatesTitle: 'வானிலை புதுப்பிப்புகள்',
+            weatherUpdatesText: 'மேலும் சிறந்த விவசாய முடிவுகளுக்காக நேரடி வானிலை புதுப்பிப்புகளைப் பெறவும்.',
+            cropRecommendationTitle: 'பயிர் பரிந்துரை',
+            cropRecommendationText: 'சரியான பயிர்களுக்கு AI அடிப்படையிலான பரிந்துரைகள்.',
+            notificationsTitle: 'அறிவிப்புகள்',
+            notificationsText: 'உதவித் தொகை நிலை மற்றும் திட்டங்களின் உடனடி புதுப்பிப்புகள்.'
+        },
+        te: {
+            languageLabel: 'భాష:',
+            heroTitle: '🌱 ఫాం సేవ',
+            heroSubtitle: 'స్మార్ట్ సబ్‌సిడీ నిర్వహణతో రైతులను బలోపేతం చేయడం',
+            loginButton: 'లాగిన్',
+            servicesTitle: 'మా సేవలు',
+            farmerRegistrationTitle: 'రైతు నమోదు',
+            farmerRegistrationText: 'ప్రభుత్వ పథకాలకు సులభంగా నమోదు చేసుకోండి.',
+            applySubsidyTitle: 'సబ్‌సిడీకి దరఖాస్తు చేయండి',
+            applySubsidyText: 'అప్లికేషన్‌లను వేగంగా మరియు భద్రంగా సమర్పించండి.',
+            trackStatusTitle: 'స్థితిని ట్రాక్ చేయండి',
+            trackStatusText: 'మీ సబ్‌సిడీని ప్రత్యక్ష సమయంలో పర్యవేక్షించండి.',
+            weatherUpdatesTitle: 'వాతావరణ నవీకరణలు',
+            weatherUpdatesText: 'మంచి వ్యవసాయ నిర్ణయాలకు ప్రత్యక్ష వాతావరణ నవీకరణలు పొందండి.',
+            cropRecommendationTitle: 'పంట సూచనలు',
+            cropRecommendationText: 'సరైన పంటలకు AI ఆధారిత సూచనలు.',
+            notificationsTitle: 'నోటిఫికేషన్స్',
+            notificationsText: 'సబ్‌సిడీ స్థితి మరియు పథకాలపై తక్షణ నవీకరణలు.'
+        }
+    };
+
+    function applyLanguage(lang) {
+        const elements = document.querySelectorAll('[data-i18n]');
+        elements.forEach(element => {
+            const key = element.dataset.i18n;
+            if (translations[lang] && translations[lang][key]) {
+                element.textContent = translations[lang][key];
+            }
+        });
+
+        const label = document.getElementById('languageLabel');
+        if (label && translations[lang] && translations[lang].languageLabel) {
+            label.textContent = translations[lang].languageLabel;
+        }
+
+        const selector = document.getElementById('languageSelect');
+        if (selector) {
+            selector.value = lang;
+        }
+    }
+
+    function setLanguage(lang) {
+        localStorage.setItem('farmSevaLanguage', lang);
+        applyLanguage(lang);
+    }
+
+    function initLanguage() {
+        const savedLanguage = localStorage.getItem('farmSevaLanguage') || 'en';
+        applyLanguage(savedLanguage);
+    }
+
+    window.addEventListener('DOMContentLoaded', initLanguage);
+</script>
+</body>
+</html>

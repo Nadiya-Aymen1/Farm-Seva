@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FarmSeva Profile</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e8f5e9, #ffffff);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 520px;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            text-align: center;
+        }
+
+        .card h1 {
+            margin: 0 0 12px;
+            color: #2e7d32;
+            font-size: 32px;
+        }
+
+        .card p {
+            margin: 0 0 28px;
+            color: #4b4b4b;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input {
+            border: 1px solid #d7d7d7;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.08);
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .button-row button {
+            border: none;
+            border-radius: 16px;
+            padding: 14px 28px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .button-save {
+            background: #2e7d32;
+            color: white;
+        }
+
+        .button-save:hover {
+            background: #1b5e20;
+            transform: translateY(-1px);
+        }
+
+        .button-logout {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .button-logout:hover {
+            background: #e0e0e0;
+        }
+
+        .message {
+            margin-top: 18px;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="card">
+        <h1>Farmer Profile</h1>
+        <p>Edit your profile details below. Your registered name appears here by default.</p>
+
+        <img id="profileImage" src="" alt="Profile Picture" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; display: none;">
+
+        <form id="profileForm">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" placeholder="Enter your name">
+            </div>
+
+            <div class="form-group">
+                <label for="farmSize">Farm Size</label>
+                <input type="text" id="farmSize" placeholder="e.g. 10 acres">
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" placeholder="e.g. Village, State">
+            </div>
+
+            <div class="form-group">
+                <label for="profilePic">Profile Picture</label>
+                <input type="file" id="profilePic" accept="image/*">
+            </div>
+
+            <div class="button-row">
+                <button type="button" class="button-save" id="saveButton">Save Profile</button>
+                <button type="button" class="button-logout" id="logoutButton">Logout</button>
+            </div>
+        </form>
+
+        <div class="message" id="statusMessage"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js';
+        authDomain: 'farm-seva-1c9cd.firebaseapp.com',
+        projectId: 'farm-seva-1c9cd',
+        storageBucket: 'farm-seva-1c9cd.firebasestorage.app',
+        messagingSenderId: '497776728271',
+        appId: '1:497776728271:web:025dc1ae4b14164a72ffba',
+        measurementId: 'G-44DNTWGEE6'
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const nameInput = document.getElementById('name');
+    const farmSizeInput = document.getElementById('farmSize');
+    const locationInput = document.getElementById('location');
+    const profilePicInput = document.getElementById('profilePic');
+    const profileImage = document.getElementById('profileImage');
+    const statusMessage = document.getElementById('statusMessage');
+
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+    async function loadProfile() {
+        if (!currentUser || !currentUser.uid) {
+            statusMessage.textContent = 'Please login via the registration flow before updating your profile.';
+        }
+
+        if (currentUser && currentUser.name) {
+            nameInput.value = currentUser.name;
+        }
+
+        if (currentUser && currentUser.uid) {
+            const profileRef = doc(db, 'profile update', currentUser.uid);
+            const profileSnapshot = await getDoc(profileRef);
+            if (profileSnapshot.exists()) {
+                const profile = profileSnapshot.data();
+                if (profile.name) nameInput.value = profile.name;
+                if (profile.farmSize) farmSizeInput.value = profile.farmSize;
+                if (profile.location) locationInput.value = profile.location;
+                if (profile.profilePicUrl) {
+                    profileImage.src = profile.profilePicUrl;
+                    profileImage.style.display = 'block';
+                }
+            }
+        } else {
+            const savedProfile = JSON.parse(localStorage.getItem('farmSevaProfile') || '{}');
+            if (savedProfile.farmSize) farmSizeInput.value = savedProfile.farmSize;
+            if (savedProfile.location) locationInput.value = savedProfile.location;
+        }
+    }
+
+    async function saveProfile() {
+        const profile = {
+            name: nameInput.value.trim(),
+            farmSize: farmSizeInput.value.trim(),
+            location: locationInput.value.trim(),
+            updatedAt: new Date().toISOString()
+        };
+
+        // Upload profile picture if selected
+        if (profilePicInput.files[0]) {
+            const file = profilePicInput.files[0];
+            const storageRef = ref(storage, `profilePics/${currentUser.uid}`);
+            try {
+                const snapshot = await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                profile.profilePicUrl = downloadURL;
+                profileImage.src = downloadURL;
+                profileImage.style.display = 'block';
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                statusMessage.textContent = 'Error uploading profile picture.';
+                return;
+            }
+        }
+
+        if (currentUser && currentUser.uid) {
+            await setDoc(doc(db, 'profile update', currentUser.uid), profile, { merge: true });
+            statusMessage.textContent = 'Profile saved to Firestore successfully!';
+        } else {
+            statusMessage.textContent = 'Profile saved locally. Login via registration flow to sync with Firestore.';
+        }
+
+        localStorage.setItem('farmSevaProfile', JSON.stringify(profile));
+        if (currentUser) {
+            currentUser.name = profile.name;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+
+        setTimeout(() => { statusMessage.textContent = ''; }, 3000);
+    }
+
+    function logout() {
+        window.location.href = 'login.html';
+    }
+
+    document.getElementById('saveButton').addEventListener('click', saveProfile);
+    document.getElementById('logoutButton').addEventListener('click', logout);
+    loadProfile();
+</script>
+</body>
+</html>

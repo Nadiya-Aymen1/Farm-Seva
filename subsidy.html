@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Subsidy Application</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #eef2f3;
+        }
+
+        .container {
+            width: 420px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 7px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1b5e20;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>🌱 Subsidy Application</h2>
+
+    <form onsubmit="applySubsidy(event)">
+
+        <!-- Personal Details -->
+        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="text" id="fid" placeholder="Farmer ID" required>
+        <input type="text" placeholder="Aadhaar Number" required>
+        <input type="text" placeholder="Mobile Number" required>
+        <input type="text" placeholder="Village / Address" required>
+
+        <!-- Land Details -->
+        <input type="number" placeholder="Land Area (acres)" required>
+
+        <select required>
+            <option value="">Land Type</option>
+            <option>Irrigated</option>
+            <option>Non-Irrigated</option>
+        </select>
+
+        <!-- Crop Details -->
+        <input type="text" placeholder="Current Crop" required>
+        <input type="text" placeholder="Previous Crop" required>
+        <input type="number" placeholder="Previous Production (quintals)" required>
+
+        <!-- Income -->
+        <input type="number" id="income" placeholder="Annual Income (₹)" required>
+
+        <!-- Subsidy -->
+        <select required>
+            <option value="">Select Subsidy Type</option>
+            <option>Seed Subsidy</option>
+            <option>Fertilizer Subsidy</option>
+            <option>Equipment Subsidy</option>
+        </select>
+
+        <button type="submit">Submit Application</button>
+    </form>
+</div>
+
+<script>
+function applySubsidy(e) {
+    e.preventDefault();
+
+    let name = document.getElementById("name").value;
+    let fid = document.getElementById("fid").value;
+    let income = document.getElementById("income").value;
+
+    let status = "";
+
+    // Eligibility check
+    if (income <= 300000) {
+        status = "✅ Approved";
+    } else {
+        status = "❌ Rejected (Income too high)";
+    }
+
+    // Store data (per user)
+    localStorage.setItem(fid + "_status", status);
+    localStorage.setItem(fid + "_name", name);
+
+    alert("Application Submitted!");
+
+    // Redirect
+    window.location.href = "status.html";
+}
+</script>
+
+</body>
+</html>
