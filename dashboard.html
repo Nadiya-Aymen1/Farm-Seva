@@ -271,9 +271,15 @@
 <script>
     // Check authentication on page load
     window.addEventListener('load', async () => {
-        if (!checkAuth()) {
-            return;
-        }
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+if (!currentUser) {
+    window.location.href = 'login.html';
+    return;
+}
+
+document.getElementById('farmerName').textContent =
+    currentUser.name || 'Farmer';
 
         // Display farmer name
         displayFarmerName();
