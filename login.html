@@ -40,26 +40,30 @@
             background: #1b5e20;
         }
 
-        #otpSection {
+        .btn-success:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .text-success {
+            color: #2e7d32 !important;
+        }
+
+        .text-danger {
+            color: #d32f2f !important;
+        }
+
+        .form-control:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+        }
+
+        #passwordSection {
             display: none;
         }
 
-        #recaptcha-container {
-            margin-top: 10px;
-        }
-
-        .message {
-            text-align: center;
-            margin-top: 15px;
-            font-weight: 600;
-        }
-
-        .message.error {
-            color: #d32f2f;
-        }
-
-        .message.success {
-            color: #2e7d32;
+        .loading {
+            display: none;
         }
     </style>
 </head>
@@ -71,177 +75,115 @@
 
     <form id="loginForm">
         <div class="mb-3">
-            <label for="phone" class="form-label">Phone Number</label>
-            <input type="tel" class="form-control" id="phone" placeholder="+911234567890" required>
+            <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+            <input type="tel" class="form-control" id="phone" placeholder="Enter 10-digit phone number" required>
+        </div>
+
+        <div id="passwordSection" class="mb-3">
+            <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="password" placeholder="Enter your password">
         </div>
 
         <div class="mb-3 d-grid">
-            <button type="button" id="sendOtpButton" class="btn btn-success">Send OTP</button>
-        </div>
-
-        <div id="otpSection" class="mb-3">
-            <label for="otp" class="form-label">Enter OTP</label>
-            <input type="text" class="form-control" id="otp" placeholder="6-digit OTP" maxlength="6">
-        </div>
-
-        <div id="otpSection" class="mb-3 d-grid">
-            <button type="button" id="verifyOtpButton" class="btn btn-success">Verify OTP & Login</button>
+            <button type="submit" id="loginButton" class="btn btn-success btn-lg">
+                <span class="login-text">Login</span>
+                <span class="loading"><i class="fas fa-spinner fa-spin"></i> Logging in...</span>
+            </button>
         </div>
     </form>
 
-    <div id="message" class="message"></div>
+    <div id="message" class="text-center mt-3 text-danger" style="display: none;"></div>
 
     <p class="text-center mt-3">
-        Don't have an account? <a href="register.html">Register here</a>
+        Don't have an account? <a href="register.html" class="text-success">Register here</a>
     </p>
 </div>
-
-<div id="recaptcha-container"></div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+<script>
+    const API_URL = 'http://localhost:8000/api';
 
-    const firebaseConfig = {
-        apiKey: 'AIzaSyCkopUkoJjkYPey0BctjdglAiBHQlRPQjo',
-        authDomain: 'farm-seva-1c9cd.firebaseapp.com',
-        projectId: 'farm-seva-1c9cd',
-        storageBucket: 'farm-seva-1c9cd.firebasestorage.app',
-        messagingSenderId: '497776728271',
-        appId: '1:497776728271:web:025dc1ae4b14164a72ffba',
-        measurementId: 'G-44DNTWGEE6'
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let confirmationResult = null;
-
-    const sendOtpButton = document.getElementById('sendOtpButton');
-    const verifyOtpButton = document.getElementById('verifyOtpButton');
-    const otpSection = document.getElementById('otpSection');
+    const loginForm = document.getElementById('loginForm');
+    const loginButton = document.getElementById('loginButton');
     const messageBox = document.getElementById('message');
+    const phoneInput = document.getElementById('phone');
+    const passwordInput = document.getElementById('password');
+    const passwordSection = document.getElementById('passwordSection');
 
-    function showMessage(text, isError = true) {
-        messageBox.textContent = text;
-        messageBox.classList.toggle('error', isError);
-        messageBox.classList.toggle('success', !isError);
-    }
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    function resetMessage() {
-        messageBox.textContent = '';
-    }
+        const phone = phoneInput.value.trim();
+        const password = passwordInput.value.trim();
 
-    function validatePhone(phone) {
-        return /^\+\d{10,15}$/.test(phone);
-    }
-
-    function initializeRecaptcha() {
-        if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-                size: 'normal',
-                callback: () => {
-                    // reCAPTCHA solved
-                }
-            }, auth);
-            window.recaptchaVerifier.render();
-        }
-    }
-
-    async function sendOtp() {
-        resetMessage();
-        
-        let phone = document.getElementById('phone').value.trim();
-
+        // Validation
         if (!phone) {
-            showMessage('Please enter your phone number.');
+            showMessage('Please enter your phone number', true);
             return;
         }
 
-        if (!phone.startsWith('+')) {
-            phone = '+91' + phone;
-        }
-
-        if (!validatePhone(phone)) {
-            showMessage('Enter a valid phone number with country code, e.g. +911234567890.');
+        if (phone.length !== 10 || isNaN(phone)) {
+            showMessage('Please enter a valid 10-digit phone number', true);
             return;
         }
 
-        initializeRecaptcha();
-        let verifier = window.recaptchaVerifier;
+        if (!password) {
+            showMessage('Please enter your password', true);
+            return;
+        }
+
+        // Show loading
+        loginButton.disabled = true;
+        loginButton.querySelector('.login-text').style.display = 'none';
+        loginButton.querySelector('.loading').style.display = 'inline';
 
         try {
-            confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
-            otpSection.style.display = 'block';
-            showMessage('OTP sent successfully. Enter the code below.', false);
-            sendOtpButton.disabled = true;
-        } catch (error) {
-            console.error('Error sending OTP:', error);
-            showMessage('Failed to send OTP. Check the phone number and Firebase configuration.');
-            if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.clear();
-                window.recaptchaVerifier = null;
-            }
-        }
-    }
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone,
+                    password
+                })
+            });
 
-    async function verifyOtpAndLogin() {
-        resetMessage();
+            const data = await response.json();
 
-        let phone = document.getElementById('phone').value.trim();
-        const otp = document.getElementById('otp').value.trim();
-
-        if (!phone.startsWith('+')) {
-            phone = '+91' + phone;
-        }
-
-        if (!confirmationResult) {
-            showMessage('Please send OTP first.');
-            return;
-        }
-
-        if (!otp || otp.length !== 6) {
-            showMessage('Please enter the 6-digit OTP sent to your phone.');
-            return;
-        }
-
-        try {
-            const result = await confirmationResult.confirm(otp);
-            const user = result.user;
-
-            // Get user details from Firestore
-            const userDocRef = doc(db, 'users', user.uid);
-            const userDoc = await getDoc(userDocRef);
-
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                localStorage.setItem('currentUser', JSON.stringify({
-                    uid: user.uid,
-                    name: userData.name,
-                    phoneNumber: userData.phoneNumber,
-                    aadhar: userData.aadhar
-                }));
-
-                showMessage('Login successful! Redirecting...', false);
+            if (data.success) {
+                // Save token and user data
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.farmer));
+                
+                showMessage('✓ Login successful! Redirecting...', false);
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
-                }, 1200);
+                }, 1500);
             } else {
-                showMessage('User data not found. Please register first.');
+                showMessage(data.message || 'Login failed', true);
             }
         } catch (error) {
-            console.error('Error verifying OTP:', error);
-            showMessage('Invalid OTP or verification failed. Please try again.');
+            showMessage('Error: ' + error.message, true);
+        } finally {
+            loginButton.disabled = false;
+            loginButton.querySelector('.login-text').style.display = 'inline';
+            loginButton.querySelector('.loading').style.display = 'none';
         }
+    });
+
+    function showMessage(text, isError) {
+        messageBox.textContent = text;
+        messageBox.className = isError ? 'text-center mt-3 text-danger' : 'text-center mt-3 text-success';
+        messageBox.style.display = 'block';
     }
 
-    sendOtpButton.addEventListener('click', sendOtp);
-    verifyOtpButton.addEventListener('click', verifyOtpAndLogin);
+    // Show password field on form load
+    window.addEventListener('load', () => {
+        passwordSection.style.display = 'block';
+    });
 </script>
 
 </body>

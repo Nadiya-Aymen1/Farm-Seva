@@ -2,27 +2,43 @@
 <html>
 <head>
     <title>FarmSeva - Dashboard</title>
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    
     <style>
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             background: #f5f5f5;
             color: #333;
         }
 
         .navbar {
-            background: #2e7d32;
+            background: linear-gradient(to right, #2e7d32, #66bb6a);
             color: white;
             padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .navbar h2 {
             margin: 0;
+            display: inline-block;
+        }
+
+        .navbar .farmer-info {
+            display: inline-block;
+            margin-left: 30px;
+            vertical-align: middle;
+        }
+
+        .navbar .farmer-info strong {
+            font-size: 16px;
         }
 
         .navbar button {
@@ -32,6 +48,8 @@
             border: none;
             cursor: pointer;
             border-radius: 4px;
+            float: right;
+            margin-top: 5px;
         }
 
         .navbar button:hover {
@@ -39,71 +57,122 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 30px 20px;
         }
 
         .welcome {
-            font-size: 20px;
-            margin-bottom: 30px;
+            font-size: 24px;
+            margin-bottom: 10px;
             color: #2e7d32;
-            font-weight: normal;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
         }
 
         .cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
         }
 
         .card {
             background: white;
-            padding: 20px;
+            padding: 25px;
             border: 1px solid #ddd;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15);
+        }
+
+        .card-icon {
+            font-size: 40px;
+            color: #2e7d32;
+            margin-bottom: 15px;
         }
 
         .card h3 {
-            margin-top: 10px;
+            margin-top: 0;
             margin-bottom: 10px;
             color: #2e7d32;
-            font-size: 16px;
-            font-weight: normal;
+            font-size: 18px;
+            font-weight: 600;
         }
 
         .card p {
             margin: 10px 0;
             color: #666;
-            font-size: 13px;
-            line-height: 1.4;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         .card button {
-            padding: 8px 16px;
+            padding: 10px 20px;
             border: none;
-            background: #4caf50;
+            background: #2e7d32;
             color: white;
-            border-radius: 3px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 13px;
-            margin-top: 10px;
+            font-size: 14px;
+            margin-top: 15px;
+            width: 100%;
+            font-weight: 500;
+            transition: background 0.2s;
         }
 
         .card button:hover {
-            background: #388e3c;
+            background: #1b5e20;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-left: 4px solid #2e7d32;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .stat-box label {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-box .value {
+            font-size: 24px;
+            color: #2e7d32;
+            font-weight: bold;
+            margin-top: 5px;
         }
 
         @media (max-width: 768px) {
             .cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .cards {
                 grid-template-columns: 1fr;
+            }
+            
+            .navbar .farmer-info {
+                display: block;
+                margin-left: 0;
+                margin-top: 10px;
             }
         }
     </style>
@@ -112,52 +181,125 @@
 <body>
 
 <div class="navbar">
-    <h2>FarmSeva</h2>
-    <button onclick="logout()">Logout</button>
+    <div>
+        <h2>🌾 FarmSeva</h2>
+        <div class="farmer-info">
+            <strong>Welcome, <span id="farmerName">Farmer</span></strong>
+        </div>
+    </div>
+    <button onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i> Logout</button>
 </div>
 
 <div class="container">
     <div class="welcome">Dashboard</div>
+    <div class="subtitle">Manage your farm, crops, and subsidy applications from here</div>
 
+    <!-- Quick Stats -->
+    <div class="quick-stats" id="quickStats">
+        <div class="stat-box">
+            <label>Land Area</label>
+            <div class="value" id="landArea">-- acres</div>
+        </div>
+        <div class="stat-box">
+            <label>Primary Crop</label>
+            <div class="value" id="primaryCrop">--</div>
+        </div>
+        <div class="stat-box">
+            <label>Active Crops</label>
+            <div class="value" id="cropCount">0</div>
+        </div>
+        <div class="stat-box">
+            <label>Subsidy Applications</label>
+            <div class="value" id="subsidyCount">0</div>
+        </div>
+    </div>
+
+    <!-- Main Cards -->
     <div class="cards">
 
-        <div class="card">
+        <div class="card" onclick="window.location.href='profile.html'">
+            <div class="card-icon"><i class="fas fa-user-circle"></i></div>
             <h3>👤 Your Profile</h3>
-            <p>View and update your farm details and contact information.</p>
-            <button onclick="window.location.href='profile.html'">Manage Profile</button>
+            <p>View and update your personal and farm details, location, and contact information.</p>
+            <button>Manage Profile</button>
         </div>
 
-        <div class="card">
+        <div class="card" onclick="window.location.href='crop.html'">
+            <div class="card-icon"><i class="fas fa-leaf"></i></div>
+            <h3>🌱 Crop Management</h3>
+            <p>Track your crops, planting dates, harvest information, and farming records.</p>
+            <button>Manage Crops</button>
+        </div>
+
+        <div class="card" onclick="window.location.href='subsidy.html'">
+            <div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
             <h3>📄 Subsidy Applications</h3>
-            <p>Apply for government subsidies and check eligibility for schemes.</p>
-            <button onclick="window.location.href='subsidy.html'">Apply for Subsidy</button>
+            <p>Apply for government subsidies and check eligibility for various farming schemes.</p>
+            <button>Apply for Subsidy</button>
         </div>
 
-        <div class="card">
+        <div class="card" onclick="window.location.href='status.html'">
+            <div class="card-icon"><i class="fas fa-chart-line"></i></div>
             <h3>📊 Application Status</h3>
-            <p>Check the status of your subsidy applications and approvals.</p>
-            <button onclick="window.location.href='status.html'">View Status</button>
+            <p>Check the status and progress of your subsidy applications and approvals.</p>
+            <button>View Status</button>
         </div>
 
-        <div class="card">
-            <h3>🌱 Crop Information</h3>
-            <p>View crop information and farming recommendations.</p>
-            <button onclick="window.location.href='crop.html'">Crop Info</button>
+        <div class="card" onclick="window.location.href='weather.html'">
+            <div class="card-icon"><i class="fas fa-cloud-sun"></i></div>
+            <h3>🌤️ Weather & Tips</h3>
+            <p>Get weather forecasts and farming tips tailored to your region.</p>
+            <button>Check Weather</button>
         </div>
 
-        <div class="card">
-            <h3>🔔 Updates</h3>
-            <p>View important updates and notifications.</p>
-            <button onclick="window.location.href='notifications.html'">View Updates</button>
+        <div class="card" onclick="window.location.href='notifications.html'">
+            <div class="card-icon"><i class="fas fa-bell"></i></div>
+            <h3>🔔 Notifications</h3>
+            <p>View important updates, alerts, and announcements from government schemes.</p>
+            <button>View Updates</button>
         </div>
 
     </div>
 </div>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- API Helper -->
+<script src="api-helper.js"></script>
+
 <script>
-function logout() {
-    window.location.href = "login.html";
-}
+    // Check authentication on page load
+    window.addEventListener('load', async () => {
+        if (!checkAuth()) {
+            return;
+        }
+
+        // Display farmer name
+        displayFarmerName();
+
+        // Load farmer profile and stats
+        const profile = await getFarmerProfile();
+        if (profile) {
+            document.getElementById('landArea').textContent = (profile.landArea || '--') + ' acres';
+            document.getElementById('primaryCrop').textContent = profile.cropType || '--';
+        }
+
+        // Load crop count
+        const crops = await getFarmerCrops();
+        document.getElementById('cropCount').textContent = crops.length;
+
+        // Load subsidy application count
+        const subsidies = await getSubsidyApplications();
+        document.getElementById('subsidyCount').textContent = subsidies.length;
+    });
+
+    // Logout function
+    function logoutUser() {
+        if (confirm('Are you sure you want to logout?')) {
+            logout();
+        }
+    }
 </script>
 
 </body>

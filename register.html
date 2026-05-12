@@ -6,6 +6,9 @@
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
 
@@ -17,6 +20,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .register-card {
@@ -24,7 +28,7 @@
             border-radius: 10px;
             padding: 40px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 420px;
+            max-width: 500px;
             width: 100%;
         }
 
@@ -37,12 +41,21 @@
             background: #1b5e20;
         }
 
-        #otpSection {
-            display: none;
+        .text-success {
+            color: #2e7d32 !important;
         }
 
-        #recaptcha-container {
-            margin-top: 10px;
+        .text-danger {
+            color: #d32f2f !important;
+        }
+
+        .form-control:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+        }
+
+        .loading {
+            display: none;
         }
     </style>
 </head>
@@ -53,205 +66,197 @@
     <h2 class="text-center mb-4">🌱 Register for FarmSeva</h2>
 
     <form id="registerForm">
+        <!-- Personal Details -->
+        <h5 class="mb-3 text-success">Personal Details</h5>
+        
         <div class="mb-3">
-            <label for="name" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="name" required>
+            <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="name" placeholder="Enter your full name" required>
         </div>
 
         <div class="mb-3">
-            <label for="phone" class="form-label">Phone Number</label>
-            <input type="tel" class="form-control" id="phone" placeholder="+911234567890" required>
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" placeholder="Enter your email (optional)">
         </div>
 
         <div class="mb-3">
-            <label for="aadhar" class="form-label">Aadhaar Number</label>
-            <input type="text" class="form-control" id="aadhar" placeholder="123412341234" maxlength="12" required>
+            <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+            <input type="tel" class="form-control" id="phone" placeholder="Enter 10-digit phone number" required>
         </div>
 
+        <div class="mb-3">
+            <label for="aadhar" class="form-label">Aadhaar Number <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="aadhar" placeholder="Enter 12-digit Aadhaar number" maxlength="12" required>
+        </div>
+
+        <!-- Farm Details -->
+        <h5 class="mb-3 mt-4 text-success">Farm Details</h5>
+
+        <div class="mb-3">
+            <label for="state" class="form-label">State</label>
+            <input type="text" class="form-control" id="state" placeholder="Enter your state">
+        </div>
+
+        <div class="mb-3">
+            <label for="district" class="form-label">District</label>
+            <input type="text" class="form-control" id="district" placeholder="Enter your district">
+        </div>
+
+        <div class="mb-3">
+            <label for="village" class="form-label">Village</label>
+            <input type="text" class="form-control" id="village" placeholder="Enter your village">
+        </div>
+
+        <div class="mb-3">
+            <label for="landArea" class="form-label">Land Area (in acres)</label>
+            <input type="number" class="form-control" id="landArea" placeholder="Enter land area" step="0.01">
+        </div>
+
+        <div class="mb-3">
+            <label for="cropType" class="form-label">Primary Crop</label>
+            <select class="form-control" id="cropType">
+                <option value="">Select a crop</option>
+                <option value="Rice">Rice</option>
+                <option value="Wheat">Wheat</option>
+                <option value="Corn">Corn</option>
+                <option value="Cotton">Cotton</option>
+                <option value="Sugarcane">Sugarcane</option>
+                <option value="Pulses">Pulses</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Fruits">Fruits</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <!-- Password -->
+        <h5 class="mb-3 mt-4 text-success">Security</h5>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="password" placeholder="Enter a strong password" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password" required>
+        </div>
+
+        <!-- Submit Button -->
         <div class="mb-3 d-grid">
-            <button type="button" id="sendOtpButton" class="btn btn-success">Send OTP</button>
-        </div>
-
-        <div id="otpSection" class="mb-3">
-            <label for="otp" class="form-label">Enter OTP</label>
-            <input type="text" class="form-control" id="otp" placeholder="6-digit OTP" maxlength="6">
-        </div>
-
-        <div class="mb-3 d-grid">
-            <button type="button" id="verifyOtpButton" class="btn btn-success">Verify OTP & Register</button>
+            <button type="submit" id="registerButton" class="btn btn-success btn-lg">
+                <span class="register-text">Register</span>
+                <span class="loading"><i class="fas fa-spinner fa-spin"></i> Registering...</span>
+            </button>
         </div>
     </form>
 
-    <div id="message" class="text-center text-danger"></div>
+    <div id="message" class="text-center mt-3 text-danger" style="display: none;"></div>
 
     <p class="text-center mt-3">
-        Already have an account? <a href="login.html">Login here</a>
+        Already have an account? <a href="login.html" class="text-success">Login here</a>
     </p>
 </div>
-
-<div id="recaptcha-container"></div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-    import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+<script>
+    const API_URL = 'http://localhost:8000/api';
 
-    const firebaseConfig = {
-        apiKey: 'AIzaSyCkopUkoJjkYPey0BctjdglAiBHQlRPQjo',
-        authDomain: 'farm-seva-1c9cd.firebaseapp.com',
-        projectId: 'farm-seva-1c9cd',
-        storageBucket: 'farm-seva-1c9cd.firebasestorage.app',
-        messagingSenderId: '497776728271',
-        appId: '1:497776728271:web:025dc1ae4b14164a72ffba',
-         measurementId: "G-44DNTWGEE6"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let confirmationResult = null;
-
-    const sendOtpButton = document.getElementById('sendOtpButton');
-    const verifyOtpButton = document.getElementById('verifyOtpButton');
-    const otpSection = document.getElementById('otpSection');
+    const registerForm = document.getElementById('registerForm');
+    const registerButton = document.getElementById('registerButton');
     const messageBox = document.getElementById('message');
 
-    function showMessage(text, isError = true) {
-        messageBox.textContent = text;
-        messageBox.classList.toggle('text-danger', isError);
-        messageBox.classList.toggle('text-success', !isError);
-    }
-
-    function resetMessage() {
-        messageBox.textContent = '';
-    }
-
-    function validatePhone(phone) {
-        return /^\+\d{10,15}$/.test(phone);
-    }
-
-    function validateAadhaar(aadhaar) {
-        return /^\d{12}$/.test(aadhaar);
-    }
-
-    function initializeRecaptcha() {
-        if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-                size: 'normal',
-                callback: () => {
-                    // reCAPTCHA solved; proceed with OTP.
-                }
-            }, auth);
-            window.recaptchaVerifier.render();
-        }
-    }
-
-    async function sendOtp() {
-        resetMessage();
-        console.log('Send OTP clicked');
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
         const name = document.getElementById('name').value.trim();
-        let phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
         const aadhar = document.getElementById('aadhar').value.trim();
-        console.log('Form values:', { name, phone, aadhar });
+        const state = document.getElementById('state').value.trim();
+        const district = document.getElementById('district').value.trim();
+        const village = document.getElementById('village').value.trim();
+        const landArea = document.getElementById('landArea').value;
+        const cropType = document.getElementById('cropType').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
 
-        if (!name || !phone || !aadhar) {
-            showMessage('Please fill in all fields.');
+        // Validation
+        if (!name || !phone || !aadhar || !password) {
+            showMessage('Please fill all required fields', true);
             return;
         }
 
-        if (!phone.startsWith('+')) {
-            phone = '+91' + phone;
-        }
-
-        if (!validatePhone(phone)) {
-            showMessage('Enter a valid phone number with country code, e.g. +911234567890.');
+        if (phone.length !== 10 || isNaN(phone)) {
+            showMessage('Please enter a valid 10-digit phone number', true);
             return;
         }
 
-        if (!validateAadhaar(aadhar)) {
-            showMessage('Aadhaar number must be exactly 12 digits.');
+        if (aadhar.length !== 12 || isNaN(aadhar)) {
+            showMessage('Please enter a valid 12-digit Aadhaar number', true);
             return;
         }
 
-        console.log('Initializing reCAPTCHA');
-        initializeRecaptcha();
-        let verifier = window.recaptchaVerifier;
+        if (password.length < 6) {
+            showMessage('Password must be at least 6 characters', true);
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showMessage('Passwords do not match', true);
+            return;
+        }
+
+        // Show loading
+        registerButton.disabled = true;
+        registerButton.querySelector('.register-text').style.display = 'none';
+        registerButton.querySelector('.loading').style.display = 'inline';
 
         try {
-            console.log('Calling signInWithPhoneNumber with phone:', phone);
-            confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
-            console.log('OTP sent successfully');
-            otpSection.style.display = 'block';
-            showMessage('OTP sent successfully. Enter the code below.', false);
-            sendOtpButton.disabled = true;
-        } catch (error) {
-            console.error('Error sending OTP:', error);
-            showMessage('Failed to send OTP. Check the phone number and Firebase configuration.');
-            if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.clear();
-                window.recaptchaVerifier = null;
-            }
-        }
-    }
-
-    async function verifyOtpAndRegister() {
-        resetMessage();
-
-        const name = document.getElementById('name').value.trim();
-        let phone = document.getElementById('phone').value.trim();
-        const aadhar = document.getElementById('aadhar').value.trim();
-        const otp = document.getElementById('otp').value.trim();
-
-        if (!phone.startsWith('+')) {
-            phone = '+91' + phone;
-        }
-
-        if (!confirmationResult) {
-            showMessage('Please send OTP first.');
-            return;
-        }
-
-        if (!otp || otp.length !== 6) {
-            showMessage('Please enter the 6-digit OTP sent to your phone.');
-            return;
-        }
-
-        try {
-            const result = await confirmationResult.confirm(otp);
-            const user = result.user;
-
-            await setDoc(doc(db, 'users', user.uid), {
-                name,
-                phoneNumber: phone,
-                aadhar,
-                createdAt: new Date().toISOString(),
-                uid: user.uid
+            const response = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    phone,
+                    aadhaar: aadhar,
+                    state,
+                    district,
+                    village,
+                    landArea: landArea ? parseFloat(landArea) : null,
+                    cropType,
+                    password
+                })
             });
 
-            localStorage.setItem('currentUser', JSON.stringify({
-                uid: user.uid,
-                name,
-                phoneNumber: phone,
-                aadhar
-            }));
+            const data = await response.json();
 
-            showMessage('Registration complete! Redirecting...', false);
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 1200);
+            if (data.success) {
+                showMessage('✓ Registration successful! Redirecting to login...', false);
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } else {
+                showMessage(data.message || 'Registration failed', true);
+            }
         } catch (error) {
-            console.error('Error verifying OTP:', error);
-            showMessage('Invalid OTP or verification failed. Please try again.');
+            showMessage('Error: ' + error.message, true);
+        } finally {
+            registerButton.disabled = false;
+            registerButton.querySelector('.register-text').style.display = 'inline';
+            registerButton.querySelector('.loading').style.display = 'none';
         }
-    }
+    });
 
-    sendOtpButton.addEventListener('click', sendOtp);
-    verifyOtpButton.addEventListener('click', verifyOtpAndRegister);
+    function showMessage(text, isError) {
+        messageBox.textContent = text;
+        messageBox.className = isError ? 'text-center mt-3 text-danger' : 'text-center mt-3 text-success';
+        messageBox.style.display = 'block';
+    }
 </script>
 
 </body>
