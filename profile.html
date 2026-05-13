@@ -102,13 +102,6 @@
             background: #e0e0e0;
         }
 
-        .optional {
-            color: #d32f2f;
-            margin-left: 4px;
-            font-size: 0.9em;
-            vertical-align: super;
-        }
-
         .message {
             margin-top: 18px;
             color: #2e7d32;
@@ -121,8 +114,6 @@
     <div class="card">
         <h1>Farmer Profile</h1>
         <p>Edit your profile details below. Your registered name appears here by default.</p>
-
-        <img id="profileImage" src="" alt="Profile Picture" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; display: none;">
 
         <form id="profileForm">
             <div class="form-group">
@@ -140,11 +131,6 @@
                 <input type="text" id="location" placeholder="e.g. Village, State">
             </div>
 
-            <div class="form-group">
-                <label for="profilePic">Profile Picture <span class="optional">*</span></label>
-                <input type="file" id="profilePic" accept="image/*">
-            </div>
-
             <div class="button-row">
                 <button type="button" class="button-save" id="saveButton">Save Profile</button>
                 <button type="button" class="button-logout" id="logoutButton">Logout</button>
@@ -158,8 +144,7 @@
 <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
     import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js';
-    
+
     const firebaseConfig = {
         apiKey: 'AIzaSyAGU2mzJxu_vwQ-8g6lnMdUhMBc9M6rA_c',
         authDomain: 'farm-seva-1c9cd.firebaseapp.com',
@@ -172,13 +157,10 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
     const nameInput = document.getElementById('name');
     const farmSizeInput = document.getElementById('farmSize');
     const locationInput = document.getElementById('location');
-    const profilePicInput = document.getElementById('profilePic');
-    const profileImage = document.getElementById('profileImage');
     const statusMessage = document.getElementById('statusMessage');
     const saveButton = document.getElementById('saveButton');
 
@@ -186,45 +168,38 @@
 
     async function loadProfile() {
         if (!currentUser || !currentUser.uid) {
-            statusMessage.textContent = 'Please login via the registration flow before updating your profile.';
+            statusMessage.textContent = 'Please login first.';
             saveButton.disabled = true;
             return;
         }
 
-        // Load name from registration (from currentUser) - make it editable
-        if (currentUser && currentUser.name) {
+        if (currentUser.name) {
             nameInput.value = currentUser.name;
         }
 
-        // Load profile details from users collection
-        if (currentUser && currentUser.uid) {
-            try {
-                const profileRef = doc(db, 'users', currentUser.uid);
-                const profileSnapshot = await getDoc(profileRef);
-                if (profileSnapshot.exists()) {
-                    const profile = profileSnapshot.data();
-                    if (profile.name) nameInput.value = profile.name;
-                    if (profile.farmSize) farmSizeInput.value = profile.farmSize;
-                    if (profile.location) locationInput.value = profile.location;
-                    if (profile.profilePicUrl) {
-                        profileImage.src = profile.profilePicUrl;
-                        profileImage.style.display = 'block';
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading profile:', error);
+        try {
+            const profileRef = doc(db, 'users', currentUser.uid);
+            const profileSnapshot = await getDoc(profileRef);
+
+            if (profileSnapshot.exists()) {
+                const profile = profileSnapshot.data();
+
+                if (profile.name) nameInput.value = profile.name;
+                if (profile.farmSize) farmSizeInput.value = profile.farmSize;
+                if (profile.location) locationInput.value = profile.location;
             }
+        } catch (error) {
+            console.error('Error loading profile:', error);
         }
     }
 
     async function saveProfile() {
         if (!currentUser || !currentUser.uid) {
-            statusMessage.textContent = 'Error: User not authenticated. Please login again.';
+            statusMessage.textContent = 'User not authenticated.';
             statusMessage.style.color = '#d32f2f';
             return;
         }
 
-        // Use the editable name input value
         const profile = {
             userId: currentUser.uid,
             name: nameInput.value.trim(),
@@ -234,37 +209,26 @@
         };
 
         try {
-            // Upload profile picture if selected
-            if (profilePicInput.files[0]) {
-                const file = profilePicInput.files[0];
-                const storageRef = ref(storage, `users/${currentUser.uid}/profilePics/${Date.now()}`);
-                const snapshot = await uploadBytes(storageRef, file);
-                const downloadURL = await getDownloadURL(snapshot.ref);
-                profile.profilePicUrl = downloadURL;
-                profileImage.src = downloadURL;
-                profileImage.style.display = 'block';
-            }
-
-            // Save to existing 'users' collection in Firestore (merge true)
             await setDoc(doc(db, 'users', currentUser.uid), profile, { merge: true });
 
-            // Update localStorage currentUser so name persists in UI
-            const updatedLocalUser = Object.assign({}, currentUser, {
-                name: profile.name,
-                phoneNumber: currentUser.phoneNumber || currentUser.phone,
-                aadhar: currentUser.aadhar || currentUser.aadhaar
-            });
+            const updatedLocalUser = {
+                ...currentUser,
+                name: profile.name
+            };
+
             localStorage.setItem('currentUser', JSON.stringify(updatedLocalUser));
 
-            statusMessage.textContent = '✅ Profile saved to Firestore successfully!';
+            statusMessage.textContent = '✅ Profile saved successfully!';
             statusMessage.style.color = '#2e7d32';
 
-            // Clear message after 3 seconds
-            setTimeout(() => { statusMessage.textContent = ''; }, 3000);
+            setTimeout(() => {
+                statusMessage.textContent = '';
+            }, 3000);
+
         } catch (error) {
             console.error('Error saving profile:', error);
-            // Show detailed error message for debugging
-            statusMessage.textContent = `❌ Error saving profile: ${error?.code || error?.message || 'unknown'}`;
+
+            statusMessage.textContent = '❌ Error saving profile';
             statusMessage.style.color = '#d32f2f';
         }
     }
@@ -276,6 +240,7 @@
 
     document.getElementById('saveButton').addEventListener('click', saveProfile);
     document.getElementById('logoutButton').addEventListener('click', logout);
+
     loadProfile();
 </script>
 </body>
