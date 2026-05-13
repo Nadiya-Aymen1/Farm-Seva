@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>FarmSeva Profile</title>
+
     <style>
         body {
             margin: 0;
@@ -22,7 +23,7 @@
         .card {
             background: white;
             border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
             padding: 32px;
             text-align: center;
         }
@@ -36,7 +37,6 @@
         .card p {
             margin: 0 0 28px;
             color: #4b4b4b;
-            line-height: 1.5;
         }
 
         .form-group {
@@ -49,7 +49,6 @@
         .form-group label {
             font-weight: 600;
             margin-bottom: 8px;
-            color: #333;
         }
 
         .form-group input {
@@ -58,19 +57,12 @@
             padding: 14px 16px;
             font-size: 16px;
             outline: none;
-            transition: border-color 0.2s ease;
-        }
-
-        .form-group input:focus {
-            border-color: #2e7d32;
-            box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.08);
         }
 
         .button-row {
             display: flex;
             justify-content: center;
             gap: 12px;
-            flex-wrap: wrap;
             margin-top: 24px;
         }
 
@@ -80,7 +72,6 @@
             padding: 14px 28px;
             font-size: 16px;
             cursor: pointer;
-            transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
         .button-save {
@@ -88,50 +79,42 @@
             color: white;
         }
 
-        .button-save:hover {
-            background: #1b5e20;
-            transform: translateY(-1px);
-        }
-
         .button-logout {
             background: #f5f5f5;
             color: #333;
         }
 
-        .button-logout:hover {
-            background: #e0e0e0;
-        }
-
         .message {
             margin-top: 18px;
-            color: #2e7d32;
             font-weight: 600;
         }
     </style>
 </head>
+
 <body>
 
 <div class="page">
     <div class="card">
 
         <h1>Farmer Profile</h1>
-        <p>Edit your profile details below. Your registered name appears here by default.</p>
+
+        <p>Edit your profile details below.</p>
 
         <form id="profileForm">
 
             <div class="form-group">
-                <label for="name">Name</label>
+                <label>Name</label>
                 <input type="text" id="name" placeholder="Enter your name">
             </div>
 
             <div class="form-group">
-                <label for="farmSize">Farm Size</label>
+                <label>Farm Size</label>
                 <input type="text" id="farmSize" placeholder="e.g. 10 acres">
             </div>
 
             <div class="form-group">
-                <label for="location">Location</label>
-                <input type="text" id="location" placeholder="e.g. Village, State">
+                <label>Location</label>
+                <input type="text" id="location" placeholder="Village, State">
             </div>
 
             <div class="button-row">
@@ -163,70 +146,57 @@ import {
 } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
 const firebaseConfig = {
-    apiKey: 'AIzaSyAGU2mzJxu_vwQ-8g6lnMdUhMBc9M6rA_c',
-    authDomain: 'farm-seva-1c9cd.firebaseapp.com',
-    projectId: 'farm-seva-1c9cd',
-    storageBucket: 'farm-seva-1c9cd.firebasestorage.app',
-    messagingSenderId: '497776728271',
-    appId: '1:497776728271:web:025dc1ae4b14164a72ffba',
-    measurementId: 'G-44DNTWGEE6'
+    apiKey: "AIzaSyAGU2mzJxu_vwQ-8g6lnMdUhMBc9M6rA_c",
+    authDomain: "farm-seva-1c9cd.firebaseapp.com",
+    projectId: "farm-seva-1c9cd",
+    storageBucket: "farm-seva-1c9cd.firebasestorage.app",
+    messagingSenderId: "497776728271",
+    appId: "1:497776728271:web:025dc1ae4b14164a72ffba"
 };
 
 const app = initializeApp(firebaseConfig);
+
 const db = getFirestore(app);
 
-const nameInput = document.getElementById('name');
-const farmSizeInput = document.getElementById('farmSize');
-const locationInput = document.getElementById('location');
-const statusMessage = document.getElementById('statusMessage');
-const saveButton = document.getElementById('saveButton');
+const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
+);
 
-/* FIXED CURRENT USER */
-const currentUser =
-    JSON.parse(localStorage.getItem('currentUser')) ||
-    JSON.parse(localStorage.getItem('user')) ||
-    JSON.parse(localStorage.getItem('farmer')) ||
-    null;
+const nameInput = document.getElementById("name");
+
+const farmSizeInput = document.getElementById("farmSize");
+
+const locationInput = document.getElementById("location");
+
+const statusMessage = document.getElementById("statusMessage");
 
 async function loadProfile() {
 
     if (!currentUser || !currentUser.uid) {
-        statusMessage.textContent = 'Please login first.';
-        statusMessage.style.color = '#d32f2f';
-        saveButton.disabled = true;
+        statusMessage.innerText = "Please login first";
         return;
-    }
-
-    if (currentUser.name) {
-        nameInput.value = currentUser.name;
     }
 
     try {
 
-        const profileRef = doc(db, 'users', currentUser.uid);
+        const docRef = doc(db, "users", currentUser.uid);
 
-        const profileSnapshot = await getDoc(profileRef);
+        const docSnap = await getDoc(docRef);
 
-        if (profileSnapshot.exists()) {
+        if (docSnap.exists()) {
 
-            const profile = profileSnapshot.data();
+            const data = docSnap.data();
 
-            if (profile.name) {
-                nameInput.value = profile.name;
-            }
+            nameInput.value = data.name || "";
 
-            if (profile.farmSize) {
-                farmSizeInput.value = profile.farmSize;
-            }
+            farmSizeInput.value = data.farmSize || "";
 
-            if (profile.location) {
-                locationInput.value = profile.location;
-            }
+            locationInput.value = data.location || "";
         }
 
     } catch (error) {
 
-        console.error('Error loading profile:', error);
+        console.log(error);
 
     }
 }
@@ -235,22 +205,20 @@ async function saveProfile() {
 
     if (!currentUser || !currentUser.uid) {
 
-        statusMessage.textContent = 'User not authenticated.';
-        statusMessage.style.color = '#d32f2f';
+        statusMessage.innerText = "User not logged in";
+
         return;
     }
 
-    const profile = {
+    const profileData = {
 
-        userId: currentUser.uid,
+        uid: currentUser.uid,
 
-        name: nameInput.value.trim(),
+        name: nameInput.value,
 
-        farmSize: farmSizeInput.value.trim(),
+        farmSize: farmSizeInput.value,
 
-        location: locationInput.value.trim(),
-
-        phone: currentUser.phone || currentUser.phoneNumber || '',
+        location: locationInput.value,
 
         updatedAt: new Date().toISOString()
     };
@@ -258,57 +226,53 @@ async function saveProfile() {
     try {
 
         await setDoc(
-            doc(db, 'users', currentUser.uid),
-            profile,
+            doc(db, "users", currentUser.uid),
+            profileData,
             { merge: true }
         );
 
-        const updatedLocalUser = {
-            ...currentUser,
-            name: profile.name
-        };
-
         localStorage.setItem(
-            'currentUser',
-            JSON.stringify(updatedLocalUser)
+            "currentUser",
+            JSON.stringify({
+                ...currentUser,
+                name: nameInput.value
+            })
         );
 
-        statusMessage.textContent =
-            '✅ Profile saved successfully!';
+        statusMessage.innerText =
+            "✅ Profile saved successfully";
 
-        statusMessage.style.color = '#2e7d32';
+        statusMessage.style.color = "green";
 
         setTimeout(() => {
-
-            statusMessage.textContent = '';
-
-        }, 3000);
+            window.location.href = "dashboard.html";
+        }, 1500);
 
     } catch (error) {
 
-        console.error('Error saving profile:', error);
+        console.log(error);
 
-        statusMessage.textContent =
-            '❌ Error saving profile';
+        statusMessage.innerText =
+            "❌ Error saving profile";
 
-        statusMessage.style.color = '#d32f2f';
+        statusMessage.style.color = "red";
     }
 }
 
 function logout() {
 
-    localStorage.removeItem('currentUser');
+    localStorage.removeItem("currentUser");
 
-    window.location.href = 'login.html';
+    window.location.href = "login.html";
 }
 
 document
-    .getElementById('saveButton')
-    .addEventListener('click', saveProfile);
+.getElementById("saveButton")
+.addEventListener("click", saveProfile);
 
 document
-    .getElementById('logoutButton')
-    .addEventListener('click', logout);
+.getElementById("logoutButton")
+.addEventListener("click", logout);
 
 loadProfile();
 
