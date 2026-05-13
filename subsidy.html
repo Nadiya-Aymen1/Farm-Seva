@@ -1,62 +1,83 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Subsidy Application</title>
+    <title>Subsidy Application - FarmSeva</title>
+
     <style>
-        body {
-            font-family: Arial;
-            background: #eef2f3;
+        body{
+            margin:0;
+            font-family:Poppins,sans-serif;
+            background:linear-gradient(135deg,#e8f5e9,#ffffff);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
         }
 
-        .container {
-            width: 420px;
-            margin: 40px auto;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        .container{
+            width:100%;
+            max-width:550px;
+            padding:20px;
         }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 15px;
+        .card{
+            background:white;
+            border-radius:24px;
+            padding:32px;
+            box-shadow:0 20px 50px rgba(0,0,0,0.08);
         }
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin: 7px 0;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
+        h1{
+            color:#2e7d32;
+            margin-bottom:10px;
+            text-align:center;
         }
 
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #2e7d32;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        p{
+            text-align:center;
+            color:#555;
+            margin-bottom:30px;
         }
 
-        button:hover {
-            background: #1b5e20;
+        .form-group{
+            display:flex;
+            flex-direction:column;
+            margin-bottom:18px;
         }
 
-        .message {
-            text-align: center;
-            margin-top: 15px;
-            font-weight: 600;
+        label{
+            margin-bottom:8px;
+            font-weight:600;
         }
 
-        .message.success {
-            color: #2e7d32;
+        input,select,textarea{
+            padding:14px;
+            border-radius:14px;
+            border:1px solid #d7d7d7;
+            font-size:16px;
+            outline:none;
         }
 
-        .message.error {
-            color: #d32f2f;
+        button{
+            width:100%;
+            padding:14px;
+            border:none;
+            border-radius:16px;
+            background:#2e7d32;
+            color:white;
+            font-size:16px;
+            cursor:pointer;
+            margin-top:10px;
+        }
+
+        button:hover{
+            background:#1b5e20;
+        }
+
+        #message{
+            margin-top:18px;
+            text-align:center;
+            font-weight:600;
         }
     </style>
 </head>
@@ -64,131 +85,162 @@
 <body>
 
 <div class="container">
-    <h2>🌱 Subsidy Application</h2>
 
-    <form id="subsidyForm" onsubmit="applySubsidy(event)">
+    <div class="card">
 
-        <!-- Personal Details -->
-        <input type="text" id="name" placeholder="Full Name" required>
-        <input type="text" id="fid" placeholder="Farmer ID" required>
-        <input type="text" id="aadhaar" placeholder="Aadhaar Number" required>
-        <input type="text" id="mobile" placeholder="Mobile Number" required>
-        <input type="text" id="village" placeholder="Village / Address" required>
+        <h1>Subsidy Application</h1>
 
-        <!-- Land Details -->
-        <input type="number" id="landArea" placeholder="Land Area (acres)" required>
+        <p>Fill the details to apply for subsidy</p>
 
-        <select id="landType" required>
-            <option value="">Land Type</option>
-            <option>Irrigated</option>
-            <option>Non-Irrigated</option>
-        </select>
+        <div class="form-group">
+            <label>Farmer Name</label>
+            <input type="text" id="name" placeholder="Enter your name">
+        </div>
 
-        <!-- Crop Details -->
-        <input type="text" id="currentCrop" placeholder="Current Crop" required>
-        <input type="text" id="previousCrop" placeholder="Previous Crop" required>
-        <input type="number" id="prevProduction" placeholder="Previous Production (quintals)" required>
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" id="phone" placeholder="Enter phone number">
+        </div>
 
-        <!-- Income -->
-        <input type="number" id="income" placeholder="Annual Income (₹)" required>
+        <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="location" placeholder="Village, State">
+        </div>
 
-        <!-- Subsidy -->
-        <select id="subsidyType" required>
-            <option value="">Select Subsidy Type</option>
-            <option>Seed Subsidy</option>
-            <option>Fertilizer Subsidy</option>
-            <option>Equipment Subsidy</option>
-        </select>
+        <div class="form-group">
+            <label>Farm Size</label>
+            <input type="text" id="farmSize" placeholder="e.g. 10 acres">
+        </div>
 
-        <button type="submit">Submit Application</button>
-    </form>
+        <div class="form-group">
+            <label>Subsidy Type</label>
 
-    <div class="message" id="statusMessage"></div>
+            <select id="subsidyType">
+                <option value="Seed Subsidy">Seed Subsidy</option>
+                <option value="Equipment Subsidy">Equipment Subsidy</option>
+                <option value="Irrigation Subsidy">Irrigation Subsidy</option>
+                <option value="Fertilizer Subsidy">Fertilizer Subsidy</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+
+            <textarea id="description" rows="4"
+            placeholder="Enter details"></textarea>
+        </div>
+
+        <button id="submitBtn">
+            Submit Application
+        </button>
+
+        <div id="message"></div>
+
+    </div>
+
 </div>
 
 <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getFirestore, doc, setDoc, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-    const firebaseConfig = {
-        apiKey: 'AIzaSyAGU2mzJxu_vwQ-8g6lnMdUhMBc9M6rA_c',
-        authDomain: 'farm-seva-1c9cd.firebaseapp.com',
-        projectId: 'farm-seva-1c9cd',
-        storageBucket: 'farm-seva-1c9cd.firebasestorage.app',
-        messagingSenderId: '497776728271',
-        appId: '1:497776728271:web:025dc1ae4b14164a72ffba',
-        measurementId: 'G-44DNTWGEE6'
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getFirestore,
+    doc,
+    setDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyAGU2mzJxu_vwQ-8g6lnMdUhMBc9M6rA_c",
+
+    authDomain: "farm-seva-1c9cd.firebaseapp.com",
+
+    projectId: "farm-seva-1c9cd",
+
+    storageBucket: "farm-seva-1c9cd.firebasestorage.app",
+
+    messagingSenderId: "497776728271",
+
+    appId: "1:497776728271:web:025dc1ae4b14164a72ffba"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+const currentUser = JSON.parse(
+    localStorage.getItem("currentUser")
+);
+
+const message = document.getElementById("message");
+
+document
+.getElementById("submitBtn")
+.addEventListener("click", submitApplication);
+
+async function submitApplication(){
+
+    if(!currentUser || !currentUser.uid){
+
+        message.innerText = "Please login first";
+        message.style.color = "red";
+        return;
+    }
+
+    const applicationData = {
+
+        uid: currentUser.uid,
+
+        name: document.getElementById("name").value,
+
+        phone: document.getElementById("phone").value,
+
+        location: document.getElementById("location").value,
+
+        farmSize: document.getElementById("farmSize").value,
+
+        subsidyType: document.getElementById("subsidyType").value,
+
+        description: document.getElementById("description").value,
+
+        status: "Pending",
+
+        createdAt: new Date().toISOString()
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-    const statusMessage = document.getElementById('statusMessage');
+    try{
 
-    window.applySubsidy = async function(e) {
-        e.preventDefault();
+        await setDoc(
+            doc(db,"subsidyApplications",currentUser.uid),
+            applicationData
+        );
 
-        const formData = {
-            name: document.getElementById('name').value.trim(),
-            farmerId: document.getElementById('fid').value.trim(),
-            aadhaar: document.getElementById('aadhaar').value.trim(),
-            mobile: document.getElementById('mobile').value.trim(),
-            village: document.getElementById('village').value.trim(),
-            landArea: document.getElementById('landArea').value,
-            landType: document.getElementById('landType').value,
-            currentCrop: document.getElementById('currentCrop').value.trim(),
-            previousCrop: document.getElementById('previousCrop').value.trim(),
-            prevProduction: document.getElementById('prevProduction').value,
-            income: parseInt(document.getElementById('income').value),
-            subsidyType: document.getElementById('subsidyType').value,
-            appliedAt: serverTimestamp(),
-            userId: currentUser?.uid || 'anonymous'
-        };
+        message.innerText =
+        "✅ Application submitted successfully";
 
-        // Eligibility check
-        let status = "";
-        if (formData.income <= 300000) {
-            status = "Approved";
-        } else {
-            status = "Rejected (Income too high)";
-        }
+        message.style.color = "green";
 
-        formData.status = status;
-        formData.applicationId = Date.now().toString();
+        setTimeout(()=>{
 
-        try {
-            // Save to Firestore in 'subsidyApplications' collection
-            const docRef = await addDoc(collection(db, 'subsidyApplications'), formData);
-            
-            // Also save application ID to user's applications list
-            if (currentUser && currentUser.uid) {
-                await setDoc(doc(db, 'users', currentUser.uid, 'subsidyApplications', docRef.id), {
-                    applicationId: docRef.id,
-                    farmerId: formData.farmerId,
-                    status: formData.status,
-                    subsidyType: formData.subsidyType,
-                    appliedAt: serverTimestamp()
-                }, { merge: true });
-            }
+            window.location.href = "trackstatus.html";
 
-            // Store in localStorage as backup
-            localStorage.setItem(formData.farmerId + "_status", formData.status);
-            localStorage.setItem(formData.farmerId + "_name", formData.name);
-            localStorage.setItem(formData.farmerId + "_applicationId", formData.applicationId);
+        },1500);
 
-            statusMessage.textContent = '✅ Application Submitted Successfully!';
-            statusMessage.className = 'message success';
-            
-            setTimeout(() => {
-                window.location.href = 'status.html';
-            }, 2000);
+    }
+    catch(error){
 
-        } catch (error) {
-            console.error('Error submitting application:', error);
-            statusMessage.textContent = '❌ Error submitting application. Please try again.';
-            statusMessage.className = 'message error';
-        }
-    };
+        console.log(error);
+
+        message.innerText =
+        "❌ Error submitting application";
+
+        message.style.color = "red";
+    }
+}
+
 </script>
 
 </body>
