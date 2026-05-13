@@ -110,12 +110,15 @@
     </style>
 </head>
 <body>
+
 <div class="page">
     <div class="card">
+
         <h1>Farmer Profile</h1>
         <p>Edit your profile details below. Your registered name appears here by default.</p>
 
         <form id="profileForm">
+
             <div class="form-group">
                 <label for="name">Name</label>
                 <input type="text" id="name" placeholder="Enter your name">
@@ -132,116 +135,184 @@
             </div>
 
             <div class="button-row">
-                <button type="button" class="button-save" id="saveButton">Save Profile</button>
-                <button type="button" class="button-logout" id="logoutButton">Logout</button>
+                <button type="button" class="button-save" id="saveButton">
+                    Save Profile
+                </button>
+
+                <button type="button" class="button-logout" id="logoutButton">
+                    Logout
+                </button>
             </div>
+
         </form>
 
         <div class="message" id="statusMessage"></div>
+
     </div>
 </div>
 
 <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-    import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-    const firebaseConfig = {
-        apiKey: 'AIzaSyAGU2mzJxu_vwQ-8g6lnMdUhMBc9M6rA_c',
-        authDomain: 'farm-seva-1c9cd.firebaseapp.com',
-        projectId: 'farm-seva-1c9cd',
-        storageBucket: 'farm-seva-1c9cd.firebasestorage.app',
-        messagingSenderId: '497776728271',
-        appId: '1:497776728271:web:025dc1ae4b14164a72ffba',
-        measurementId: 'G-44DNTWGEE6'
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc
+} from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+const firebaseConfig = {
+    apiKey: 'AIzaSyAGU2mzJxu_vwQ-8g6lnMdUhMBc9M6rA_c',
+    authDomain: 'farm-seva-1c9cd.firebaseapp.com',
+    projectId: 'farm-seva-1c9cd',
+    storageBucket: 'farm-seva-1c9cd.firebasestorage.app',
+    messagingSenderId: '497776728271',
+    appId: '1:497776728271:web:025dc1ae4b14164a72ffba',
+    measurementId: 'G-44DNTWGEE6'
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const nameInput = document.getElementById('name');
+const farmSizeInput = document.getElementById('farmSize');
+const locationInput = document.getElementById('location');
+const statusMessage = document.getElementById('statusMessage');
+const saveButton = document.getElementById('saveButton');
+
+/* FIXED CURRENT USER */
+const currentUser =
+    JSON.parse(localStorage.getItem('currentUser')) ||
+    JSON.parse(localStorage.getItem('user')) ||
+    JSON.parse(localStorage.getItem('farmer')) ||
+    null;
+
+async function loadProfile() {
+
+    if (!currentUser || !currentUser.uid) {
+        statusMessage.textContent = 'Please login first.';
+        statusMessage.style.color = '#d32f2f';
+        saveButton.disabled = true;
+        return;
+    }
+
+    if (currentUser.name) {
+        nameInput.value = currentUser.name;
+    }
+
+    try {
+
+        const profileRef = doc(db, 'users', currentUser.uid);
+
+        const profileSnapshot = await getDoc(profileRef);
+
+        if (profileSnapshot.exists()) {
+
+            const profile = profileSnapshot.data();
+
+            if (profile.name) {
+                nameInput.value = profile.name;
+            }
+
+            if (profile.farmSize) {
+                farmSizeInput.value = profile.farmSize;
+            }
+
+            if (profile.location) {
+                locationInput.value = profile.location;
+            }
+        }
+
+    } catch (error) {
+
+        console.error('Error loading profile:', error);
+
+    }
+}
+
+async function saveProfile() {
+
+    if (!currentUser || !currentUser.uid) {
+
+        statusMessage.textContent = 'User not authenticated.';
+        statusMessage.style.color = '#d32f2f';
+        return;
+    }
+
+    const profile = {
+
+        userId: currentUser.uid,
+
+        name: nameInput.value.trim(),
+
+        farmSize: farmSizeInput.value.trim(),
+
+        location: locationInput.value.trim(),
+
+        phone: currentUser.phone || currentUser.phoneNumber || '',
+
+        updatedAt: new Date().toISOString()
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    try {
 
-    const nameInput = document.getElementById('name');
-    const farmSizeInput = document.getElementById('farmSize');
-    const locationInput = document.getElementById('location');
-    const statusMessage = document.getElementById('statusMessage');
-    const saveButton = document.getElementById('saveButton');
+        await setDoc(
+            doc(db, 'users', currentUser.uid),
+            profile,
+            { merge: true }
+        );
 
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-
-    async function loadProfile() {
-        if (!currentUser || !currentUser.uid) {
-            statusMessage.textContent = 'Please login first.';
-            saveButton.disabled = true;
-            return;
-        }
-
-        if (currentUser.name) {
-            nameInput.value = currentUser.name;
-        }
-
-        try {
-            const profileRef = doc(db, 'users', currentUser.uid);
-            const profileSnapshot = await getDoc(profileRef);
-
-            if (profileSnapshot.exists()) {
-                const profile = profileSnapshot.data();
-
-                if (profile.name) nameInput.value = profile.name;
-                if (profile.farmSize) farmSizeInput.value = profile.farmSize;
-                if (profile.location) locationInput.value = profile.location;
-            }
-        } catch (error) {
-            console.error('Error loading profile:', error);
-        }
-    }
-
-    async function saveProfile() {
-        if (!currentUser || !currentUser.uid) {
-            statusMessage.textContent = 'User not authenticated.';
-            statusMessage.style.color = '#d32f2f';
-            return;
-        }
-
-        const profile = {
-            userId: currentUser.uid,
-            name: nameInput.value.trim(),
-            farmSize: farmSizeInput.value.trim(),
-            location: locationInput.value.trim(),
-            updatedAt: new Date().toISOString()
+        const updatedLocalUser = {
+            ...currentUser,
+            name: profile.name
         };
 
-        try {
-            await setDoc(doc(db, 'users', currentUser.uid), profile, { merge: true });
+        localStorage.setItem(
+            'currentUser',
+            JSON.stringify(updatedLocalUser)
+        );
 
-            const updatedLocalUser = {
-                ...currentUser,
-                name: profile.name
-            };
+        statusMessage.textContent =
+            '✅ Profile saved successfully!';
 
-            localStorage.setItem('currentUser', JSON.stringify(updatedLocalUser));
+        statusMessage.style.color = '#2e7d32';
 
-            statusMessage.textContent = '✅ Profile saved successfully!';
-            statusMessage.style.color = '#2e7d32';
+        setTimeout(() => {
 
-            setTimeout(() => {
-                statusMessage.textContent = '';
-            }, 3000);
+            statusMessage.textContent = '';
 
-        } catch (error) {
-            console.error('Error saving profile:', error);
+        }, 3000);
 
-            statusMessage.textContent = '❌ Error saving profile';
-            statusMessage.style.color = '#d32f2f';
-        }
+    } catch (error) {
+
+        console.error('Error saving profile:', error);
+
+        statusMessage.textContent =
+            '❌ Error saving profile';
+
+        statusMessage.style.color = '#d32f2f';
     }
+}
 
-    function logout() {
-        localStorage.removeItem('currentUser');
-        window.location.href = 'login.html';
-    }
+function logout() {
 
-    document.getElementById('saveButton').addEventListener('click', saveProfile);
-    document.getElementById('logoutButton').addEventListener('click', logout);
+    localStorage.removeItem('currentUser');
 
-    loadProfile();
+    window.location.href = 'login.html';
+}
+
+document
+    .getElementById('saveButton')
+    .addEventListener('click', saveProfile);
+
+document
+    .getElementById('logoutButton')
+    .addEventListener('click', logout);
+
+loadProfile();
+
 </script>
+
 </body>
 </html>
